@@ -1,0 +1,319 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Downloads</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #f0f1f2; --card: #fff; --line: #dcdee0; --ink: #333; --dim: #8b9096;
+  --head: #f7f8f8; --accent: #0086e3;
+  --live: #0086e3; --good: #3aa757; --warn: #d98014; --bad: #cc3b33; --muted: #8b9096;
+  --track: #e6e8ea;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14161a; --card: #1b1e23; --line: #2b2f36; --ink: #e6e9ed; --dim: #8d949e;
+    --head: #1f232a; --accent: #3aa0ea;
+    --live: #57adf0; --good: #55c47c; --warn: #e0a248; --bad: #e2726a; --muted: #8d949e;
+    --track: #2b2f36;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 14px/1.5 "Helvetica Neue", Helvetica, Arial, "Segoe UI", sans-serif;
+}
+.bar {
+  position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 16px;
+  padding: 0 20px; height: 46px; background: var(--head); border-bottom: 1px solid var(--line);
+}
+.bar h1 { font-size: 16px; font-weight: 500; margin: 0; letter-spacing: 0; }
+.bar .where { color: var(--dim); font-size: 12.5px; }
+.tabs { margin-left: auto; display: flex; gap: 2px; }
+.tabs button {
+  border: 0; background: none; color: var(--dim); font: inherit; font-size: 13px;
+  padding: 0 14px; height: 46px; cursor: pointer; border-bottom: 2px solid transparent;
+}
+.tabs button:hover { color: var(--ink); }
+.tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+
+main { max-width: 840px; margin: 0 auto; padding: 20px 20px 60px; }
+section[hidden] { display: none; }
+h2 {
+  font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--dim); margin: 24px 0 8px 2px;
+}
+h2:first-child { margin-top: 4px; }
+
+.panel { background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: 16px 18px; }
+.panel + .panel { margin-top: 10px; }
+.panel p { margin: 0 0 12px; color: var(--dim); font-size: 12.5px; }
+.panel .lead { color: var(--ink); font-size: 14px; margin-bottom: 4px; }
+
+form.add { display: flex; gap: 8px; }
+input {
+  flex: 1 1 auto; min-width: 0; padding: 7px 10px; border-radius: 3px;
+  border: 1px solid var(--line); background: var(--card); color: var(--ink); font: inherit;
+}
+input.narrow { flex: 0 1 190px; }
+input.days { flex: 0 0 92px; }
+input:focus { outline: 0; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(0,134,227,.18); }
+button {
+  padding: 7px 15px; border-radius: 3px; border: 1px solid var(--line);
+  background: var(--card); color: var(--ink); font: inherit; cursor: pointer; white-space: nowrap;
+}
+button:hover { border-color: var(--dim); }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.primary:hover { filter: brightness(1.07); }
+.landing { margin-top: 10px; color: var(--dim); font-size: 12px; font-family: Consolas, Menlo, monospace; word-break: break-all; }
+
+.nothing { border: 1px dashed var(--line); border-radius: 4px; padding: 26px; text-align: center; color: var(--dim); }
+.job { background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: 13px 16px; margin-bottom: 8px; }
+.job.past { background: none; border-color: transparent; padding: 8px 16px; }
+.job.past .name { font-weight: 400; }
+.top { display: flex; align-items: center; gap: 10px; }
+.name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pill {
+  margin-left: auto; flex: none; font-size: 11.5px; font-weight: 500;
+  padding: 1px 9px; border-radius: 999px; border: 1px solid currentColor;
+}
+.live { color: var(--live); } .good { color: var(--good); }
+.warn { color: var(--warn); } .bad { color: var(--bad); } .muted { color: var(--muted); }
+.src { color: var(--dim); font-size: 12px; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.track { height: 5px; border-radius: 999px; background: var(--track); margin: 10px 0 7px; overflow: hidden; }
+.fill { height: 100%; border-radius: 999px; background: currentColor; transition: width .3s ease; }
+.fill.unknown {
+  width: 100%; opacity: .3;
+  background: repeating-linear-gradient(90deg, currentColor 0 8px, transparent 8px 20px);
+}
+.facts { display: flex; flex-wrap: wrap; gap: 3px 12px; font-size: 12px; color: var(--dim); }
+.facts b { color: var(--ink); font-weight: 500; }
+.err { margin-top: 8px; padding: 7px 10px; border-radius: 3px; font-size: 12px; border: 1px solid currentColor; word-break: break-word; }
+.err.bad { color: var(--bad); }
+.err.warn { color: var(--warn); }
+.err .why { display: block; color: var(--dim); margin-top: 3px; }
+.path { margin-top: 7px; font-family: Consolas, Menlo, monospace; font-size: 11px; color: var(--dim); word-break: break-all; }
+.path.gone { text-decoration: line-through; }
+.acts { display: flex; gap: 6px; margin-top: 10px; }
+.acts button { padding: 4px 12px; font-size: 12.5px; }
+
+.host { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-top: 1px solid var(--line); }
+.host:first-child { border-top: 0; }
+.host .name { flex: 1 1 auto; }
+.host .apps { color: var(--dim); font-size: 12px; }
+.host .why { color: var(--bad); font-size: 12px; }
+.host button { flex: none; padding: 4px 12px; font-size: 12.5px; min-width: 68px; }
+.host input { flex: 0 1 240px; padding: 4px 9px; font-size: 12px; }
+.host.off .name { color: var(--dim); text-decoration: line-through; }
+
+.row { display: flex; gap: 8px; align-items: center; }
+.note { margin-top: 10px; font-size: 12.5px; color: var(--dim); }
+.said { margin-top: 10px; font-size: 12.5px; }
+.said.bad { color: var(--bad); }
+.said.good { color: var(--good); }
+</style>
+
+<div class="bar">
+  <h1>Downloads</h1>
+  <span class="where" id="where"></span>
+  <div class="tabs" role="tablist">
+    <button id="tab-work" role="tab" aria-selected="true">In flight</button>
+    <button id="tab-set" role="tab" aria-selected="false">Settings</button>
+  </div>
+</div>
+
+<main>
+  <section id="work">
+    <div class="panel">
+      <form class="add" id="add">
+        <input name="source" placeholder="Paste a link and this NAS fetches it" autocomplete="off" spellcheck="false" required>
+        <input name="name" class="narrow" placeholder="save as (optional)" autocomplete="off" spellcheck="false">
+        <button class="primary">Download</button>
+      </form>
+      <div class="landing" id="landing"></div>
+      <div class="said" id="addSaid"></div>
+    </div>
+    <div id="list"></div>
+  </section>
+
+  <section id="set" hidden>
+    <h2>Where files land</h2>
+    <div class="panel">
+      <p class="lead">A folder inside this package's shared folder. Everything fetched here is written under it.</p>
+      <form class="row" id="folderForm">
+        <input name="folder" class="narrow" autocomplete="off" spellcheck="false">
+        <button class="primary">Save</button>
+      </form>
+      <div class="landing" id="landing2"></div>
+      <div class="said" id="folderSaid"></div>
+    </div>
+
+    <h2>Keep finished files</h2>
+    <div class="panel">
+      <p class="lead">Delete a finished download's file once it is this many days old. 0 keeps everything.</p>
+      <form class="row" id="keepForm">
+        <input name="keepFilesDays" class="days" type="number" min="0" max="3650" autocomplete="off">
+        <span style="color:var(--dim);font-size:12.5px">days</span>
+        <button class="primary">Save</button>
+      </form>
+      <div class="note" id="retention"></div>
+      <div class="note">The record is never removed. It says the bytes were fetched, checked against their digest and written — which stays true after the file goes, and is how a machine knows not to fetch them twice. A download whose file has been swept says so in the list.</div>
+      <div class="said" id="keepSaid"></div>
+    </div>
+
+    <h2>May reach</h2>
+    <div class="panel" id="reach"></div>
+
+    <h2>Underneath</h2>
+    <div class="panel"><div class="landing" id="bindings"></div></div>
+  </section>
+</main>
+
+<script>
+const esc = s => (s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const list = document.getElementById("list");
+const reachEl = document.getElementById("reach");
+
+const tabs = { work: document.getElementById("tab-work"), set: document.getElementById("tab-set") };
+for (const [name, btn] of Object.entries(tabs)) btn.onclick = () => show(name);
+function show(name) {
+  for (const [n, btn] of Object.entries(tabs)) {
+    btn.setAttribute("aria-selected", String(n === name));
+    document.getElementById(n).hidden = n !== name;
+  }
+}
+
+function body(j) {
+  const facts = [j.bar, j.step, j.holder, j.moved].filter(Boolean)
+    .map((f, i) => i === 0 ? `<span><b>${esc(f)}</b></span>` : `<span>${esc(f)}</span>`).join("");
+  const track = j.track
+    ? `<div class="track ${j.tone}"><div class="fill${j.unknown ? " unknown" : ""}" style="${j.unknown ? "" : `width:${j.percent}%`}"></div></div>`
+    : "";
+  // A refusal is not a failure: the record is still good and another machine can
+  // take it. Two different colours and two different sentences, because a person
+  // who reads "failed" throws the job away.
+  const err = j.error
+    ? `<div class="err ${j.adoptable ? "warn" : "bad"}">${esc(j.error)}${
+        j.adoptable ? `<span class="why">This NAS declined it. The download is still good — a machine that may do it can pick it up unchanged.</span>` : ""}</div>`
+    : "";
+  return `<div class="top ${j.tone}">
+      <span class="name">${esc(j.name || j.id)}</span>
+      <span class="pill">${esc(j.state)}</span>
+    </div>
+    ${j.source ? `<div class="src">${esc(j.source)}</div>` : ""}
+    ${track}
+    <div class="facts">${facts}</div>
+    ${err}
+    ${j.path ? `<div class="path${j.gone ? " gone" : ""}">${esc(j.path)}</div>` : ""}`;
+}
+
+function acts(j) {
+  return [
+    j.canPause && `<button data-do="pause" data-id="${esc(j.id)}">Pause</button>`,
+    j.canResume && `<button data-do="resume" data-id="${esc(j.id)}">Resume</button>`,
+    j.canCollect && `<button class="primary" data-do="collect" data-id="${esc(j.id)}">Collect</button>`,
+    j.canCancel && `<button data-do="cancel" data-id="${esc(j.id)}">Cancel</button>`,
+  ].filter(Boolean).join("");
+}
+
+// Rewriting the list every second would take the buttons out from under a
+// finger already on its way down, so each part is replaced only when its own
+// markup changed and everything else is moved rather than remade.
+const cards = new Map();
+const nothing = Object.assign(document.createElement("div"), { className: "nothing" });
+const earlier = Object.assign(document.createElement("h2"), { textContent: "Earlier" });
+const sync = (el, html) => { if (el.dataset.h !== html) { el.innerHTML = html; el.dataset.h = html; } };
+
+const folderIn = document.forms.folderForm.folder;
+const keepIn = document.forms.keepForm.keepFilesDays;
+
+function draw(s) {
+  document.getElementById("where").textContent = "fetched by: " + s.where;
+  document.getElementById("bindings").textContent = s.bindings.join("   ·   ");
+  document.getElementById("retention").textContent = s.retention;
+  for (const id of ["landing", "landing2"]) document.getElementById(id).textContent = "files land in " + s.landing;
+  if (document.activeElement !== folderIn) folderIn.value = s.settings.folder;
+  if (document.activeElement !== keepIn) keepIn.value = s.settings.keepFilesDays;
+
+  if (s.nothing) { nothing.textContent = s.nothing; list.append(nothing); } else nothing.remove();
+  let divided = false;
+  (s.jobs || []).forEach((j, i) => {
+    let el = cards.get(j.id);
+    if (!el) {
+      el = document.createElement("div");
+      el.innerHTML = `<div></div><div class="acts"></div>`;
+      cards.set(j.id, el);
+    }
+    if (j.finished && i > 0 && !divided) { list.append(earlier); divided = true; }
+    el.className = "job" + (j.finished ? " past" : "");
+    const rows = acts(j);
+    sync(el.children[0], body(j));
+    sync(el.children[1], rows);
+    el.children[1].style.display = rows ? "" : "none";
+    list.append(el);
+  });
+  if (!divided) earlier.remove();
+  for (const [id, el] of cards) {
+    if (!(s.jobs || []).some(j => j.id === id)) { el.remove(); cards.delete(id); }
+  }
+  drawReach(s.reach || []);
+}
+
+// One row per host a download here has named, and the switch beside it. Off is a
+// refusal with a reason: the next connection any runner on this NAS opens to
+// that host is refused, and the reason is what the application shows.
+function drawReach(rows) {
+  const html = rows.length ? rows.map(r => `<div class="host${r.refused ? " off" : ""}">
+      <span class="name">${esc(r.host)}</span>
+      <span class="apps">${esc(r.apps.length ? "reached by " + r.apps.join(", ") : "not reached yet")}</span>
+      ${r.refused ? `<span class="why">${esc(r.reason)}</span>`
+                  : `<input class="reason" placeholder="why — the application shows this" autocomplete="off" spellcheck="false">`}
+      <button data-reach="${r.refused ? "allow" : "refuse"}" data-host="${esc(r.host)}">${r.refused ? "Allow" : "Refuse"}</button>
+    </div>`).join("") : `<div class="host"><span class="apps">No download here has named a host yet.</span></div>`;
+  sync(reachEl, html);
+}
+
+async function post(path, fields, said) {
+  if (said) { said.textContent = ""; said.className = "said"; }
+  const r = await fetch(path, { method: "POST", body: new URLSearchParams(fields) });
+  if (!r.ok && said) { said.textContent = await r.text(); said.className = "said bad"; }
+  return r.ok;
+}
+
+const addForm = document.getElementById("add");
+const addSaid = document.getElementById("addSaid");
+addForm.onsubmit = async e => {
+  e.preventDefault();
+  if (await post("/act", { do: "add", source: addForm.source.value, name: addForm.name.value }, addSaid)) {
+    addForm.reset();
+  }
+};
+
+document.forms.folderForm.onsubmit = async e => {
+  e.preventDefault();
+  const said = document.getElementById("folderSaid");
+  if (await post("/settings", { folder: folderIn.value, keepFilesDays: keepIn.value }, said)) {
+    said.textContent = "Saved. New downloads land there."; said.className = "said good";
+  }
+};
+document.forms.keepForm.onsubmit = async e => {
+  e.preventDefault();
+  const said = document.getElementById("keepSaid");
+  if (await post("/settings", { folder: folderIn.value, keepFilesDays: keepIn.value }, said)) {
+    said.textContent = "Saved."; said.className = "said good";
+  }
+};
+
+list.onclick = e => {
+  const b = e.target.closest("button[data-do]");
+  if (b) post("/act", { do: b.dataset.do, id: b.dataset.id });
+};
+reachEl.onclick = e => {
+  const b = e.target.closest("button[data-reach]");
+  if (!b) return;
+  const reason = b.parentElement.querySelector(".reason");
+  post("/act", { do: b.dataset.reach, host: b.dataset.host, reason: (reason && reason.value) || "switched off here" });
+};
+
+new EventSource("/events").onmessage = e => draw(JSON.parse(e.data));
+</script>

@@ -1,0 +1,50 @@
+#!/bin/sh
+set -eu
+PKG="${SYNOPKG_PKGNAME:-AbstractionJobd}"
+VOL="${SYNOPKG_PKGDEST_VOL:-/volume1}"
+TARGET="${SYNOPKG_PKGDEST:-/var/packages/$PKG/target}"
+ETC="/var/packages/$PKG/etc"
+SHARE="abstraction"
+PORT="8734"
+
+# synoshare is root-only and off the default PATH, and its argument list is
+# undocumented and moves between DSM releases. The share is only how another
+# machine reaches the store over SMB, so a failure here must not fail the
+# install: the store, the daemon and the window all work without it.
+SYNOSHARE=/usr/syno/sbin/synoshare
+[ -x "$SYNOSHARE" ] || SYNOSHARE="$(command -v synoshare || echo synoshare)"
+
+mkdir -p "$ETC"
+chown "$PKG:$PKG" "$ETC" 2>/dev/null || true
+if [ ! -f "$ETC/store.path" ]; then
+    "$SYNOSHARE" --get "$SHARE" >/dev/null 2>&1 ||
+        "$SYNOSHARE" --add "$SHARE" "job store watched by jobd" "$VOL/$SHARE" "" "" "" 0 0 >/dev/null 2>&1 ||
+        echo "$PKG: no '$SHARE' shared folder was created; share $VOL/$SHARE from Control Panel to reach it over SMB" >&2
+    echo "$VOL/$SHARE/store" >"$ETC/store.path"
+fi
+STORE="$(cat "$ETC/store.path")"
+
+mkdir -p "$STORE"
+chown "$PKG:users" "$STORE" 2>/dev/null || true
+chmod 2775 "$STORE"
+chmod 0644 "$ETC/store.path"
+
+# The window's key, and the only thing in front of the window: the port is open
+# on the LAN over plain HTTP. DSM's launcher carries the key, so an administrator
+# signed in to DSM opens the window by clicking the icon; anyone else needs the
+# key, which is 0600 under the package account.
+if [ ! -s "$ETC/ui.key" ]; then
+    od -An -N24 -tx1 /dev/urandom | tr -d ' \n' >"$ETC/ui.key"
+    echo >>"$ETC/ui.key"
+fi
+chown "$PKG:$PKG" "$ETC/ui.key" 2>/dev/null || true
+chmod 0600 "$ETC/ui.key"
+echo "$PORT" >"$ETC/ui.port"
+
+if [ -f "$TARGET/ui/config.in" ]; then
+    sed -e "s/@@PORT@@/$PORT/" -e "s/@@KEY@@/$(cat "$ETC/ui.key")/" \
+        "$TARGET/ui/config.in" >"$TARGET/ui/config"
+    rm -f "$TARGET/ui/config.in"
+    chmod 0644 "$TARGET/ui/config"
+fi
+exit 0

@@ -1,0 +1,5 @@
+#!/bin/sh
+PKG="${SYNOPKG_PKGNAME:-AbstractionJobd}"
+STORE="$(cat "/var/packages/$PKG/etc/store.path" 2>/dev/null || echo "/volume1/abstraction/store")"
+echo "$PKG removed. Its job store and every file it downloaded are still at $STORE; delete them yourself."
+exit 0

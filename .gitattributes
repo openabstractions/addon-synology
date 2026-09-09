@@ -1,0 +1,5 @@
+# Force LF everywhere, regardless of a contributor's core.autocrlf. This
+# matters concretely for spk/scripts/*: DSM will not run a lifecycle script
+# whose shebang line ends in a carriage return, and it fails at that with no
+# more specific diagnostic than the package silently not starting.
+* text=auto eol=lf

@@ -1,0 +1,42 @@
+#!/bin/sh
+set -u
+PKG="${SYNOPKG_PKGNAME:-AbstractionJobd}"
+TARGET="${SYNOPKG_PKGDEST:-/var/packages/$PKG/target}"
+ETC="/var/packages/$PKG/etc"
+STORE="${ABSTRACTION_STORE:-$(cat "$ETC/store.path" 2>/dev/null || echo "/volume1/abstraction/store")}"
+PORT="$(cat "$ETC/ui.port" 2>/dev/null || echo 8734)"
+LOG="$STORE/jobd.log"
+export ABSTRACTION_STORE="$STORE"
+# A package account has no home, so os.UserConfigDir falls back to /tmp and the
+# refusal list a person set would silently un-refuse at the next reboot.
+export XDG_CONFIG_HOME="$ETC"
+
+ui_pid() { cat "$STORE/jobui.pid" 2>/dev/null; }
+ui_alive() { kill -0 "$(ui_pid)" 2>/dev/null; }
+
+case "${1:-}" in
+start)
+    mkdir -p "$STORE" || exit 1
+    umask 002
+    "$TARGET/bin/jobd" start --interval 30s >>"$LOG" 2>&1 || exit 1
+    # jobui binds loopback by default and the package overrides it, because
+    # DSM's launcher opens this window from the browser: desktop.js builds
+    # http://<window.location.hostname>:<port>/ and DSM proxies nothing for a
+    # package's own port.
+    ui_alive || {
+        nohup "$TARGET/bin/jobui" -addr ":$PORT" -etc "$ETC" >>"$LOG" 2>&1 &
+        echo $! >"$STORE/jobui.pid"
+    }
+    exit 0 ;;
+stop)
+    ui_alive && kill "$(ui_pid)"
+    rm -f "$STORE/jobui.pid"
+    "$TARGET/bin/jobd" stop >>"$LOG" 2>&1
+    exit 0 ;;
+status)
+    "$TARGET/bin/jobd" status --exit-code >/dev/null 2>&1 && exit 0
+    exit 3 ;;
+*)
+    echo "usage: $0 start|stop|status" >&2
+    exit 1 ;;
+esac

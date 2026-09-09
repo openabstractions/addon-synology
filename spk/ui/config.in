@@ -1,0 +1,15 @@
+{
+    ".url": {
+        "SYNO.SDS._ThirdParty.App.AbstractionJobd": {
+            "type": "url",
+            "title": "Abstraction Downloads",
+            "desc": "What this NAS is fetching for other machines, and where it puts it",
+            "icon": "images/app_{0}.png",
+            "protocol": "http",
+            "port": "@@PORT@@",
+            "url": "/?k=@@KEY@@",
+            "urlTarget": "_blank",
+            "allUsers": false
+        }
+    }
+}
