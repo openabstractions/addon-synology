@@ -1,5 +1,10 @@
 # addon-synology
 
+This package is a configured backend worker. Normal applications use their local
+runtime service; that service owns NAS access. Shared-folder examples below are
+explicit backend administration and legacy-provider integration.
+
+
 **In development.** No tagged release; the DSM package here has not been
 through a release yet.
 

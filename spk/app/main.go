@@ -1,3 +1,4 @@
+// Explicit legacy adoption: this caller retains embedded/provider APIs.
 // Command jobui is the window a person opens from DSM: what this NAS is
 // fetching, what it finished, and the two settings a NAS needs — where files
 // land and how long they stay.
@@ -25,7 +26,7 @@ import (
 	"time"
 
 	download "github.com/openabstractions/abstraction-download/go"
-	abstraction "github.com/openabstractions/abstraction-facade/go"
+	abstraction "github.com/openabstractions/abstraction-facade/go/legacy"
 	job "github.com/openabstractions/abstraction-job/go"
 )
 
