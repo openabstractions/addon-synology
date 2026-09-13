@@ -61,11 +61,29 @@ type view struct {
 	created time.Time
 }
 
+// bindings names what is underneath for a diagnostic line. Never a branch.
+func (a *app) bindings() []string {
+	out := []string{"jobs: file"}
+	if _, ok := a.runner.Store.(job.Scratch); !ok {
+		out[0] = "jobs: service"
+	}
+	where := a.downloads.Where()
+	if where == "here" {
+		if linked := download.RegisteredTiers(); len(linked) > 0 {
+			where = "here (no system downloader; linked and unavailable: " + strings.Join(linked, ", ") + ")"
+		} else {
+			where = "here (no system downloader, no tier linked)"
+		}
+	}
+	out = append(out, "download: "+where)
+	return append(out, "storage: "+strings.Join(a.stores.Names(), ", "))
+}
+
 func (a *app) snapshot() state {
 	set, setErr := a.settings.read()
 	s := state{
 		Where:     a.downloads.Where(),
-		Bindings:  a.machine.Bindings(),
+		Bindings:  a.bindings(),
 		Settings:  set,
 		Landing:   filepath.Join(a.root, filepath.FromSlash(set.Folder)),
 		Retention: a.retentionLine(set),

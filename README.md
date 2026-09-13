@@ -1,18 +1,25 @@
-# addon-synology
+# addon-synology: legacy durable downloads as a Synology package
 
-This package is a configured backend worker. Normal applications use their local
-runtime service; that service owns NAS access. Shared-folder examples below are
-explicit backend administration and legacy-provider integration.
+For people running a NAS. An application uses the shared runtime instead of
+this legacy provider.
 
+`jobd` here names the binary `spk/build.sh` builds by default from the
+`service-jobd` repository; it is a different program from
+`abstraction-download`'s own `jobd` command, removed from that repository in
+0.1.8.
 
-**In development.** No tagged release; the DSM package here has not been
-through a release yet.
+Install the retained shared-folder `jobd` provider on a Synology NAS to keep a
+download running while the PC sleeps. A request arrives through the share; the
+package resumes and verifies the transfer and leaves the completed file there.
 
-**Abstraction jobd is a Synology DSM package that downloads files on your NAS.**
-Hand it a link from your PC and it keeps fetching while your machine sleeps, is
-closed, or is switched off; the file is waiting on the NAS when you come back.
+Current OA applications use their local runtime service for new integrations.
+That service can mediate registered providers and owns NAS access, credentials
+and operation state. This package documents explicit administration of the
+earlier shared-folder provider.
 
-This repository is the native DSM package, installed through Package Center.
+**Development status.** No tagged package release has completed qualification.
+
+This repository builds the native DSM package installed through Package Center.
 For a container instead — on a Synology or on any other NAS that runs Docker —
 use [docker-jobd](https://github.com/openabstractions/docker-jobd). It is the
 same program with the same behaviour; only the way it is installed differs.

@@ -1,4 +1,3 @@
-// Explicit legacy adoption: this caller retains embedded/provider APIs.
 // Command jobui is the window a person opens from DSM: what this NAS is
 // fetching, what it finished, and the two settings a NAS needs — where files
 // land and how long they stay.
@@ -25,9 +24,10 @@ import (
 	"strings"
 	"time"
 
+	config "github.com/openabstractions/abstraction-config/go"
 	download "github.com/openabstractions/abstraction-download/go"
-	abstraction "github.com/openabstractions/abstraction-facade/go/legacy"
 	job "github.com/openabstractions/abstraction-job/go"
+	storage "github.com/openabstractions/abstraction-storage/go"
 )
 
 //go:embed page.html
@@ -44,14 +44,27 @@ func main() {
 	sweep := flag.Duration("sweep", time.Hour, "how often retention looks at the clock")
 	flag.Parse()
 
-	m, err := abstraction.Discover()
+	// The package runs the NAS's own download provider: this process is the
+	// runtime on DSM, and it reads that provider's store directly.
+	storePath := config.LoadWithOverrides(map[string]string{"ABSTRACTION_STORE": os.Getenv("ABSTRACTION_STORE")}).Store
+	if storePath == "" {
+		var err error
+		storePath, err = config.LegacyJobStore()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	store, err := job.NewFileStore(storePath)
 	if err != nil {
 		log.Fatal(err)
 	}
+	r := download.DiscoverIn(store)
+	stores := storage.New(storage.Discover()...)
 	a := &app{
-		machine:   m,
-		downloads: m.Download(),
-		jobs:      m.Jobs(),
+		runner:    r,
+		stores:    stores,
+		downloads: download.NewClient(r, download.WithStorage(stores)),
+		jobs:      r.Store,
 		reach:     download.DefaultRefusals(),
 		settings:  settingsAt(filepath.Join(*etc, "settings.json")),
 	}
@@ -79,7 +92,8 @@ func main() {
 }
 
 type app struct {
-	machine   abstraction.Machine
+	runner    *download.Runner
+	stores    *storage.Stores
 	downloads download.Client
 	jobs      job.Store
 	reach     download.Refusals
